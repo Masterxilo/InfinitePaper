@@ -1,3 +1,8 @@
+#include <stdio.h>
+
+#include <vector>
+using namespace std;
+#include <assert.h>
 struct Point {
   double x, y;
   Point(double x, double y) : x(x), y(y) {}
@@ -117,7 +122,79 @@ bool approx(Point x, Point y) {
 }
 
 
-#include <assert.h>
+// Program
+// _ means at the last time
+TwoPointOrNulls t, t_;
+NullOrTwoPoints tb, tb_;
+R2toR2Rigid f, fi, f_, fi_;
+
+
+PointOrNull d, d_;
+vector<Point> q;
+vector<vector<Point>> p;
+
+int i = 0;
+
+void print() {
+
+  if (d.isNull)
+    printf("d null\n");
+  else
+    printf("d (%f %f)\n", d.x, d.y);
+
+  printf("q");
+  for (Point a : q)
+    printf("(%f %f) ", a.x, a.y);
+  printf("\n");
+
+  printf("p:\n");
+  for (vector<Point> b : p) {
+    for (Point a : b)
+      printf("(%f %f) ", a.x, a.y);
+    printf("\n");
+  }
+
+  // t
+  if (t.p1.isNull)
+  if (t.p2.isNull)
+    printf("t null null\n");
+  else
+    printf("t null (%f %f)\n", t.p2.x, t.p2.y);
+  else
+  if (t.p2.isNull)
+    printf("t (%f %f) null\n", t.p1.x, t.p1.y);
+  else
+    printf("t (%f %f) (%f %f)\n", t.p1.x, t.p1.y, t.p2.x, t.p2.y);
+
+  // tb
+  if (tb.isNull)
+    printf("tb null\n");
+  else
+    printf("tb (%f %f) (%f %f)\n", tb.p1.x, tb.p1.y, tb.p2.x, tb.p2.y);
+
+  // test f
+  Point tf = f(Point(0, 0));
+  printf("world 0, 0 -> screen [f(0, 0)] == %f %f\n", tf.x, tf.y);
+
+  tf = f(Point(1, 0));
+  printf("world 1, 0 -> screen [f(1, 0)] == %f %f\n", tf.x, tf.y);
+
+  tf = f(Point(0, 1));
+  printf("world 0, 1 -> screen [f(0, 1)] == %f %f\n", tf.x, tf.y);
+
+  tf = f(Point(1, 1));
+  printf("world 1, 1 -> screen [f(1, 1)] == %f %f\n", tf.x, tf.y);
+
+  printf("f(p):\n");
+  for (vector<Point> b : p) {
+    for (Point a : b) {
+      a = f(a);
+      printf("(%f %f) ", a.x, a.y);
+    }
+    printf("\n");
+  }
+  printf("\n");
+}
 
 NullOrTwoPoints computeTb(TwoPointOrNulls t, TwoPointOrNulls t_) {
   if (t.p1.isNull && t.p2.isNull) return NullOrTwoPoints();
@@ -168,15 +245,7 @@ NullOrTwoPoints computeTb(TwoPointOrNulls t, TwoPointOrNulls t_) {
   return NullOrTwoPoints();
 }
 
-#include <stdio.h>
 
-// Program
-// _ means at the last time
-TwoPointOrNulls t, t_;
-NullOrTwoPoints tb, tb_;
-R2toR2Rigid f, fi, f_, fi_;
-
-int i = 0;
 void step() {
   i++;
   // Update tb
@@ -205,44 +274,26 @@ void step() {
       );
   }
 
-
+  /*
+  // Update p
+  if (d.isNull && !d_.isNull)
+    p.push_back(q);
+  
+  // Update q
+  if (d.isNull) // && !q.empty())
+    q = vector<Point>();
+  else
+    q.push_back(fi(Point(d.x, d.y)));
+    */
   // do something
-  printf("==== i %d ====\n", i);
-  // t
-  if (t.p1.isNull)
-  if (t.p2.isNull)
-    printf("t null null\n");
-  else
-    printf("t null (%f %f)\n", t.p2.x, t.p2.y);
-  else
-  if (t.p2.isNull)
-    printf("t (%f %f) null\n", t.p1.x, t.p1.y);
-  else
-    printf("t (%f %f) (%f %f)\n", t.p1.x, t.p1.y, t.p2.x, t.p2.y);
-
-  // tb
-  if (tb.isNull)
-    printf("tb null\n");
-  else
-    printf("tb (%f %f) (%f %f)\n", tb.p1.x, tb.p1.y, tb.p2.x, tb.p2.y);
-
-  // test f
-  Point tf = f(Point(0, 0));
-  printf("world 0, 0 -> screen [f(0, 0)] == %f %f\n", tf.x, tf.y);
-
-  tf = f(Point(1, 0));
-  printf("world 1, 0 -> screen [f(1, 0)] == %f %f\n", tf.x, tf.y);
-
-  tf = f(Point(0, 1));
-  printf("world 0, 1 -> screen [f(0, 1)] == %f %f\n", tf.x, tf.y);
-
-  tf = f(Point(1, 1));
-  printf("world 1, 1 -> screen [f(1, 1)] == %f %f\n", tf.x, tf.y);
-
-
+  //printf("==== i %d ====\n", i);
+  //print();
+  
   // Update last value
   t_ = t;
   tb_ = tb;
   f_ = f;
   fi_ = fi;
+
+  d_ = d;
 }

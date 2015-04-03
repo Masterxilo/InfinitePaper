@@ -103,6 +103,22 @@ int DrawGLScene(GLvoid)									// Here's Where We Do All The Drawing
   glVertex2d(tf10.x, tf10.y);
   glVertex2d(tf00.x, tf00.y);
   glEnd();
+  /*
+  glBegin(GL_LINE_STRIP);
+  for (const Point& a : q) {
+    Point c = f(a);
+    glVertex2d(c.x, c.y);
+  }
+  glEnd();
+
+  glBegin(GL_LINE_STRIP);
+  for (const vector<Point>& b : p) {
+    for (const Point& a : b) {
+      Point c = f(a);
+      glVertex2d(c.x, c.y);
+    }
+  }
+  glEnd();*/
 
 
 	return TRUE;										// Everything Went OK
@@ -336,18 +352,30 @@ LRESULT CALLBACK WndProc(	HWND	hWnd,			// Handle For This Window
   switch (uMsg)									// Check For Windows Messages
   {
   case WM_MOUSEMOVE: {
-      //===
-
+                       //===
+                       t = TwoPointOrNulls();
                        d = PointOrNull();
 
                        RECT client;
                        GetClientRect(hWnd, &client);
-                       if (wParam == MK_LBUTTON) {
-                         d.x = GET_X_LPARAM(lParam);
-                         d.y = client.bottom-GET_Y_LPARAM(lParam);
+
+#define MOUSEEVENTF_FROMTOUCH 0xFF515700
+                       if (
+                         false&&
+                         wParam == MK_LBUTTON//GetAsyncKeyState(VK_LBUTTON)
+                         &&
+                         ((GetMessageExtraInfo() & MOUSEEVENTF_FROMTOUCH) != MOUSEEVENTF_FROMTOUCH)
+                         ) { //) {
+                         POINT p;
+                         GetCursorPos(&p);
+                         ScreenToClient(hWnd, &p);
+                         d = PointOrNull(
+                           p.x,
+                           client.bottom - p.y
+                           );
                        }
-      step();
-      //===
+                       step();
+                       //===
   }
     break;
 
@@ -365,6 +393,7 @@ LRESULT CALLBACK WndProc(	HWND	hWnd,			// Handle For This Window
         int j = 0;
 
         t = TwoPointOrNulls();
+        d = PointOrNull();
 
         // for touchpoints
         for (int i = 0; i < static_cast<INT>(cInputs); i++, j++) {
@@ -374,7 +403,7 @@ LRESULT CALLBACK WndProc(	HWND	hWnd,			// Handle For This Window
             POINT ptInput;
             ptInput.x = TOUCH_COORD_TO_PIXEL(ti.x);
             ptInput.y = TOUCH_COORD_TO_PIXEL(ti.y);
-            printf("ti :: %d %d\n", ti.x, ti.y);
+            //printf("ti :: %d %d\n", ti.x, ti.y);
             ScreenToClient(hWnd, &ptInput);
 
             if (ti.dwFlags & TOUCHEVENTF_UP) continue; // ignore released points
@@ -496,6 +525,8 @@ int WINAPI WinMain(	HINSTANCE	hInstance,			// Instance
 				}
 				else								// Not Time To Quit, Update Screen
 				{
+         
+
 
 					DrawGLScene();					// Draw The Scene
 					SwapBuffers(hDC);				// Swap Buffers (Double Buffering)
